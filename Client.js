@@ -19,6 +19,7 @@ const contractAddr = fs.readFileSync('./Contract/address.txt', 'utf8');
 let web3 = new Web3();
 let contract;
 let nonce;
+let socket;
 
 let txCount = 0;
 let completedTxs = 0;
@@ -41,6 +42,11 @@ measureEmitter.on('measure', async function send(temp, time, nonce){
         console.log(`Failed signTransaction => ${err}`);
         socket.emit('err', `Failed signTransaction => ${err}`);
         txCount--;
+console.log(txCount);
+	if(txCount === 0){
+            console.log('Task completed');
+            socket.emit('results', completedTxs, (Date.now() - startTime)/1000);
+        }
         return;
     }
 
@@ -49,6 +55,7 @@ measureEmitter.on('measure', async function send(temp, time, nonce){
             console.log(receipt);
             completedTxs++;
             txCount--;
+console.log(txCount);
             if(txCount === 0){
                 console.log('Task completed');
                 socket.emit('results', completedTxs, (Date.now() - startTime)/1000);
@@ -56,8 +63,9 @@ measureEmitter.on('measure', async function send(temp, time, nonce){
         })
         .catch(error => {
             console.log(error);
-            socket.emit('err', error);
+            socket.emit('err', error.toString());
             txCount--;
+console.log(txCount);
             if(txCount === 0){
                 console.log('Task completed');
                 socket.emit('results', completedTxs, (Date.now() - startTime)/1000);
@@ -89,7 +97,6 @@ async function start(txs, s) {
     }
 }
 
-let socket;
 function connect(server_url) {
     socket = io(server_url, {
         query: {
@@ -113,12 +120,6 @@ function connect(server_url) {
             }
         })*/
         web3.setProvider(providerUrl);
-        if(!web3.isConnected()){
-            console.log(`Connection to ${providerUrl} failed`);
-            socket.emit('err', `Connection to ${providerUrl} failed`);
-            socket.emit('results', 0, 0);
-            return;
-        }
         contract = new web3.eth.Contract(abi, contractAddr);
         txCount = task.txs;
         completedTxs = 0;
