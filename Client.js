@@ -129,7 +129,7 @@ function connect(server_url) {
         console.log(`Sleeping for ${time} hours`);
         socket.disconnect();
         await sleep(time*60*60);
-        connect(url);
+        connect(server_url);
     })
 }
 

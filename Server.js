@@ -124,8 +124,8 @@ async function pauseClient(){
         clients.get(address).emit('sleep', sleep);
     }catch (e){
         console.log(chalk.red(e));
-        cmdPrompt();
     }
+    cmdPrompt();
 }
 
 async function pauseAll(){
@@ -138,21 +138,18 @@ async function pauseAll(){
             }
         }
     };
-    let sleep;
     try {
         prompt.start();
-        sleep = await prompt.get(sleepSchema);
+        let {sleep} = await prompt.get(sleepSchema);
         if(sleep <= 0){
             console.log(chalk.red('Sleep time must be greater than zero'));
             cmdPrompt();
             return;
         }
+	io.emit('sleep', sleep); 
     }catch (e){
         console.log(chalk.red(e));
-        cmdPrompt();
-        return;
     }
-    io.emit('sleep', sleep);
     cmdPrompt();
 }
 
