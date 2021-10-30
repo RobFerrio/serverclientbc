@@ -42,7 +42,7 @@ measureEmitter.on('measure', async function send(temp, time, nonce){
         console.log(`Failed signTransaction => ${err}`);
         socket.emit('err', `Failed signTransaction => ${err}`);
         txCount--;
-console.log(txCount);
+        console.log(txCount);
 	if(txCount === 0){
             console.log('Task completed');
             socket.emit('results', completedTxs, (Date.now() - startTime)/1000);
@@ -55,7 +55,7 @@ console.log(txCount);
             console.log(receipt);
             completedTxs++;
             txCount--;
-console.log(txCount);
+	    console.log(txCount);
             if(txCount === 0){
                 console.log('Task completed');
                 socket.emit('results', completedTxs, (Date.now() - startTime)/1000);
@@ -65,7 +65,7 @@ console.log(txCount);
             console.log(error);
             socket.emit('err', error.toString());
             txCount--;
-console.log(txCount);
+	    console.log(txCount);
             if(txCount === 0){
                 console.log('Task completed');
                 socket.emit('results', completedTxs, (Date.now() - startTime)/1000);
@@ -78,15 +78,15 @@ function sleep(s) {
 }
 
 async function start(txs, s) {
+    startTime = Date.now();
     try {
         nonce = web3.utils.numberToHex(await web3.eth.getTransactionCount(accAddr));
     }catch (err){
         console.log(`Failed getTransactionCount => ${err}`);
         socket.emit('err', `Failed getTransactionCount => ${err}`);
-        socket.emit('results', 0, 0);
+        socket.emit('results', 0, (Date.now() - startTime)/1000);
         return;
     }
-    startTime = Date.now();
     for (let i = 0; i < txs; i++) {
         const wait = sleep(s);
         const measurements = await hub.read();
@@ -105,7 +105,7 @@ function connect(server_url) {
     });
 
     socket.on('task', (task) => {
-        console.log(`txs: ${task.txs} sleep: ${task.sleep} task.endpoint: ${task.endpoint}`);
+        console.log(`txs: ${task.txs} sleep: ${task.sleep} endpoint: ${task.endpoint}`);
 
         let providerUrl;
         if(task.endpoint)
@@ -131,7 +131,7 @@ function connect(server_url) {
         socket.disconnect();
         await sleep(time*60*60);
         connect(server_url);
-    })
+    });
 }
 
 const serverUrl = 'http://localhost:8080';  //Si potrebbe mettere come arg o nell'.env
