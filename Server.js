@@ -207,8 +207,10 @@ io.on('connection', function (socket){
     console.log(chalk.green('Client connected => ' + socket.handshake.query.addr));
     clients.set(socket.handshake.query.addr, socket);
     socket.on('results', (txs, duration) => {
-        console.log(`Address ` + chalk.cyan(socket.handshake.query.addr) + `: ${txs} transactions executed in ${duration}s (${txs/duration}tx/s)`);
-        waitEmitter.emit('task completed', socket.handshake.query.addr);
+	if(pendingTasks.has(socket.handshake.query.addr)){
+	    console.log(`Address ` + chalk.cyan(socket.handshake.query.addr) + `: ${txs} transactions executed in ${duration}s (${txs/duration}tx/s)`);
+            waitEmitter.emit('task completed', socket.handshake.query.addr);
+	}
     });
     socket.on('err', (err) => {
         console.log(chalk.red(`Error at ${socket.handshake.query.addr}: ${err}`));
